@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Submit Thought – PPS ENGINE</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <h2>Write Your Thought</h2>
+  <form id="thoughtForm">
+    <textarea id="text" placeholder="Write something..." required></textarea>
+    <label>Mood:</label>
+    <select id="mood">
+      <option>🙂</option>
+      <option>😐</option>
+      <option>😔</option>
+    </select>
+    <label>Category:</label>
+    <select id="category">
+      <option>Thought</option>
+      <option>Curiosity</option>
+      <option>Mistake</option>
+      <option>Feeling</option>
+      <option>Weird Idea</option>
+    </select>
+    <button type="submit" class="btn">Submit</button>
+  </form>
+  <div id="result"></div>
+
+  <script>
+  // Replace VERCEL_BASE with your Vercel project URL (no trailing slash)
+  const VERCEL_BASE = "https://REPLACE_WITH_YOUR_VERCEL_URL";
+
+  document.getElementById("thoughtForm").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    const text = document.getElementById("text").value.trim();
+    const mood = document.getElementById("mood").value;
+    const category = document.getElementById("category").value;
+    if(!text) return alert("Write something first.");
+    document.querySelector(".btn").disabled = true;
+    document.getElementById("result").innerText = "Submitting…";
+
+    try {
+      const res = await fetch(VERCEL_BASE + "/api/save", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ text, mood, category })
+      });
+      const data = await res.json();
+      if(data?.aiReply) {
+        document.getElementById("result").innerHTML = "<h3>Your AI Reply:</h3><p class='reply'>"+data.aiReply+"</p><a class='btn' href='index.html'>Go to Feed</a>";
+      } else {
+        document.getElementById("result").innerText = "Error: "+JSON.stringify(data);
+      }
+    } catch(err){
+      document.getElementById("result").innerText = "Network error: "+err.message;
+    } finally {
+      document.querySelector(".btn").disabled = false;
+    }
+  });
+  </script>
+</body>
+</html>
